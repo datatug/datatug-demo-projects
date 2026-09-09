@@ -8,9 +8,6 @@ package tests
 
 import (
 	"context"
-	"encoding/json"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/datatug/datatug-core/pkg/datatug"
@@ -22,51 +19,9 @@ import (
 
 const projectDir = "../demo-project-1"
 
-// entityIDs lists demo-project-1's entities (entities/README.md is stale and
-// omits several of these; entities/entities-summary.json is a notes-only
-// index with no field data) - kept here so TestDemoProject1_Validate
-// exercises the real, complete set.
-var entityIDs = []string{"Album", "Artist", "Country", "Customer", "Invoice", "InvoiceLine", "Person", "Track"}
-
 func newStore(t *testing.T) datatug.ProjectStore {
 	t.Helper()
 	return filestore.NewProjectStore("demo-project-1", projectDir)
-}
-
-// loadEntity reads one entity file directly from its known on-disk path,
-// bypassing filestore.fsEntitiesStore.LoadEntity/LoadEntities.
-//
-// As of the datatug-core version this module pins (v0.19.0),
-// pkg/storage/filestore/store_entities.go still assumes a flat
-// "<entities>/<id>.entity.json" layout, but datatug-demo-projects nests each
-// entity as "<entities>/<id>/<id>.entity.json" - so LoadEntities finds zero
-// entities here, and LoadEntity(id) 404s. datatug-cli's *vendored* copy of
-// this same package (pkg/datatug-core/storage/filestore/store_entities.go in
-// that repo) already moved to the nested, per-entity-directory convention
-// (see its entityDirPath/entityFilePath helpers) and datatug-cli's own
-// `entity list`/`entity show` commands work against this exact project as a
-// result - but that fix was never carried back to the published
-// datatug-core module. This is a discovered datatug-core defect, out of this
-// stream's scope to fix (see the PR body); this helper reads the same real
-// datatug.Entity type and on-disk file the fixed loader would, just without
-// going through the currently-broken directory walk.
-func loadEntity(t *testing.T, id string) *datatug.Entity {
-	t.Helper()
-	filePath := filepath.Join(projectDir, "entities", id, id+".entity.json")
-	data, err := os.ReadFile(filePath)
-	require.NoError(t, err, "failed to read %s", filePath)
-	entity := &datatug.Entity{}
-	require.NoError(t, json.Unmarshal(data, entity), "failed to parse %s", filePath)
-	return entity
-}
-
-func loadAllEntities(t *testing.T) datatug.Entities {
-	t.Helper()
-	entities := make(datatug.Entities, len(entityIDs))
-	for i, id := range entityIDs {
-		entities[i] = loadEntity(t, id)
-	}
-	return entities
 }
 
 func fieldByID(t *testing.T, entity *datatug.Entity, fieldID string) *datatug.EntityField {
@@ -81,9 +36,10 @@ func fieldByID(t *testing.T, entity *datatug.Entity, fieldID string) *datatug.En
 }
 
 // loadQueries loads the three library queries these tests need, by their
-// folder-qualified id (this path works correctly against the published
-// datatug-core module - the queries store's LoadQuery takes an explicit
-// folder path as part of id, unlike the entities store).
+// folder-qualified id. datatug-core's Project.LoadProject does not populate
+// Project.Queries at all (a separate, still-open gap, unrelated to the
+// entities/boards/dbmodels dual-layout fixes this module now pins) - so
+// tests that need query definitions load them directly.
 func loadQueries(t *testing.T, store datatug.ProjectStore, ids ...string) datatug.QueryDefs {
 	t.Helper()
 	ctx := context.Background()
@@ -96,16 +52,31 @@ func loadQueries(t *testing.T, store datatug.ProjectStore, ids ...string) datatu
 	return queries
 }
 
-// TestDemoProject1_Validate assembles the full project (every entity, read
-// directly per loadEntity's doc comment, plus its three DTQL/SQL library
-// queries) and asserts Project.Validate() passes end to end against real
-// datatug-core.
+// TestDemoProject1_Validate loads demo-project-1 through the real
+// filestore.LoadProject (datatug-core v0.20.0/#305 fixed entities loading
+// from demo-project-1's per-entity directories; v0.21.0/#306 fixed the same
+// bug class for boards and DB models, and Project.Validate() has covered
+// declared mappings since v0.17.0/#302) and asserts: every entity loads, the
+// demo's board1 board and chinook DB model load with their real content,
+// and - once its three library queries are attached, the one thing
+// LoadProject still doesn't populate - Project.Validate() passes.
 func TestDemoProject1_Validate(t *testing.T) {
 	store := newStore(t)
 	project, err := store.LoadProject(context.Background())
 	require.NoError(t, err, "failed to load %s", projectDir)
 
-	project.Entities = loadAllEntities(t)
+	wantEntityIDs := []string{"Album", "Artist", "Country", "Customer", "Invoice", "InvoiceLine", "Person", "Track"}
+	assert.ElementsMatch(t, wantEntityIDs, project.Entities.IDs())
+
+	if assert.Len(t, project.Boards, 1) {
+		assert.Equal(t, "board1", project.Boards[0].ID)
+		assert.Equal(t, "1st board", project.Boards[0].Title)
+	}
+
+	if assert.Len(t, project.DbModels, 1) {
+		assert.Equal(t, "chinook", project.DbModels[0].ID)
+	}
+
 	project.Queries = &datatug.QueriesFolder{
 		Items: loadQueries(t, store, "customers/customer-invoices", "customers/customer-purchases-by-genre", "invoices/invoice-lines"),
 	}
@@ -116,9 +87,17 @@ func TestDemoProject1_Validate(t *testing.T) {
 // TestDemoProject1_DeclaredMappings asserts the five mappings plan task 4
 // lists are present, exactly as declared (see s3b-demo-mappings.md item 1).
 func TestDemoProject1_DeclaredMappings(t *testing.T) {
-	customer := loadEntity(t, "Customer")
-	invoice := loadEntity(t, "Invoice")
-	country := loadEntity(t, "Country")
+	store := newStore(t)
+	ctx := context.Background()
+
+	loadEntity := func(id string) *datatug.Entity {
+		e, err := store.LoadEntity(ctx, id)
+		require.NoError(t, err, "failed to load entity %s", id)
+		return e
+	}
+	customer := loadEntity("Customer")
+	invoice := loadEntity("Invoice")
+	country := loadEntity("Country")
 
 	assert.Contains(t, fieldByID(t, customer, "ID").Mappings,
 		datatug.PhysicalRef{Source: "chinook", Collection: "Customer", Column: "CustomerId"})
@@ -135,7 +114,9 @@ func TestDemoProject1_DeclaredMappings(t *testing.T) {
 // TestDemoProject1_ResolveChinookCustomerColumns runs semantic.Resolve over a
 // hard-coded Chinook Customer column list, per s3b-demo-mappings.md item 3.
 func TestDemoProject1_ResolveChinookCustomerColumns(t *testing.T) {
-	entities := []*datatug.Entity{loadEntity(t, "Customer"), loadEntity(t, "Invoice"), loadEntity(t, "Country")}
+	store := newStore(t)
+	entities, err := store.LoadEntities(context.Background())
+	require.NoError(t, err)
 
 	columns := []semantic.Column{
 		{Name: "CustomerId", Type: "integer"},
