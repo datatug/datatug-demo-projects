@@ -209,8 +209,8 @@ func TestDemoProject1_QueriesLoad(t *testing.T) {
 	assert.NoError(t, project.Validate())
 }
 
-// TestDemoProject1_DeclaredMappings asserts the five mappings plan task 4
-// lists are present, exactly as declared (see s3b-demo-mappings.md item 1).
+// TestDemoProject1_DeclaredMappings asserts the mappings needed by the demo
+// are present, exactly as declared.
 func TestDemoProject1_DeclaredMappings(t *testing.T) {
 	store := newStore(t)
 	ctx := context.Background()
@@ -234,6 +234,8 @@ func TestDemoProject1_DeclaredMappings(t *testing.T) {
 		datatug.PhysicalRef{Source: "chinook", Collection: "Invoice", Column: "InvoiceId"})
 	assert.Contains(t, fieldByID(t, country, "Name").Mappings,
 		datatug.PhysicalRef{Source: "chinook", Collection: "Customer", Column: "Country"})
+	assert.Contains(t, fieldByID(t, country, "Name").Mappings,
+		datatug.PhysicalRef{Source: "support-notes", Collection: "support-notes", Column: "Country"})
 }
 
 // TestDemoProject1_ResolveChinookCustomerColumns runs semantic.Resolve over a

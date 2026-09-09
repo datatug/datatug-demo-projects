@@ -32,8 +32,10 @@ parameterized queries ([`queries/customers`](demo-project-1/queries/customers),
 [`queries/invoices`](demo-project-1/queries/invoices)) declare which entity field each
 parameter binds to (`Parameters[].Meta`), and
 [`policies`](demo-project-1/policies) shows row- and column-level access control: an
-`admin` role sees everything, a `support` role sees only Canadian customers and never
-their email address.
+`admin` role sees everything, while a `support` role sees Canadian Customer, Invoice and
+support-note rows under separate rules and never sees Customer email addresses. The
+[Phase 1 acceptance fixture](demo-project-1/fixtures/chinook/README.md) pins the Chinook
+database revision and the exact customer IDs and counts used by the demo journey.
 
 ## [License](LICENSE)
 Licensed under [Creative Commons Zero v1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)

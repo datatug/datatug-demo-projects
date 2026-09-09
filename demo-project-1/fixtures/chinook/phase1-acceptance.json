@@ -1,0 +1,34 @@
+{
+  "database": {
+    "repository": "https://github.com/datatug/chinook-database",
+    "revision": "6334395117e2478a2712e083be614721341c26c9",
+    "path": "ChinookDatabase/DataSources/Chinook_Sqlite.sqlite",
+    "sha256": "f82efedb6c5c40734609e168bc5be5616a2eca6b90ed0048451a8674625e03a3"
+  },
+  "customers": {
+    "brazilian": {
+      "id": 1,
+      "country": "Brazil",
+      "invoiceCount": 7,
+      "supportNoteCount": 1
+    },
+    "canadian": {
+      "id": 3,
+      "country": "Canada",
+      "invoiceCount": 7,
+      "supportNoteCount": 1
+    },
+    "investigation": {
+      "id": 5,
+      "country": "Czech Republic",
+      "invoiceCount": 7,
+      "supportNoteCount": 2
+    }
+  },
+  "supportScope": {
+    "country": "Canada",
+    "customerCount": 8,
+    "invoiceCount": 56,
+    "supportNoteCount": 1
+  }
+}

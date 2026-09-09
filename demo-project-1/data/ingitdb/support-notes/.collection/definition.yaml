@@ -6,6 +6,9 @@ columns:
     CustomerId:
         type: int
         required: true
+    Country:
+        type: string
+        required: true
     Author:
         type: string
         required: true
@@ -17,6 +20,7 @@ columns:
         required: true
 columns_order:
     - CustomerId
+    - Country
     - Author
     - CreatedAt
     - Note

@@ -38,6 +38,40 @@ ruleSets:
             - Phone
             - Fax
             - SupportRepId
+    - path: /Invoice
+      rules:
+        - id: invoices-support
+          effect: allow
+          operations: [query]
+          where:
+            op: "=="
+            left: { field: BillingCountry }
+            right: { value: Canada }
+          fields:
+            - InvoiceId
+            - CustomerId
+            - InvoiceDate
+            - BillingAddress
+            - BillingCity
+            - BillingState
+            - BillingCountry
+            - BillingPostalCode
+            - Total
+    - path: /support-notes
+      rules:
+        - id: support-notes-support
+          effect: allow
+          operations: [query]
+          where:
+            op: "=="
+            left: { field: Country }
+            right: { value: Canada }
+          fields:
+            - CustomerId
+            - Country
+            - Author
+            - CreatedAt
+            - Note
 bindings:
   roles:
     admin: [admin]
