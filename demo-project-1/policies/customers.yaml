@@ -1,0 +1,39 @@
+apiVersion: dalgo.io/access/v1
+kind: AccessPolicy
+metadata:
+  name: demo-project-1
+default: deny
+ruleSets:
+  admin:
+    - path: /**
+      rules:
+        - id: admin-full-access
+          effect: allow
+          operations: [readwrite]
+  support:
+    - path: /Customer
+      rules:
+        - id: customers-support
+          effect: allow
+          operations: [query]
+          where:
+            op: "=="
+            left: { field: Country }
+            right: { value: Canada }
+          fields:
+            - CustomerId
+            - FirstName
+            - LastName
+            - Company
+            - Address
+            - City
+            - State
+            - Country
+            - PostalCode
+            - Phone
+            - Fax
+            - SupportRepId
+bindings:
+  roles:
+    admin: [admin]
+    support: [support]

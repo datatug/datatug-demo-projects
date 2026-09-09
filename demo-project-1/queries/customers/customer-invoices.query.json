@@ -1,0 +1,38 @@
+{
+  "id": "customer-invoices",
+  "title": "Customer invoices",
+  "type": "SQL",
+  "parameters": [
+    {
+      "id": "CustomerId",
+      "type": "integer",
+      "isRequired": true,
+      "meta": {
+        "entity": "Customer",
+        "field": "ID"
+      }
+    }
+  ],
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "InvoiceId",
+          "type": "integer",
+          "meta": {
+            "entity": "Invoice",
+            "field": "ID"
+          }
+        },
+        {
+          "name": "Total",
+          "type": "number",
+          "meta": {
+            "entity": "Invoice",
+            "field": "Total"
+          }
+        }
+      ]
+    }
+  ]
+}

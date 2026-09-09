@@ -1,5 +1,5 @@
 {
-  "id": "Invoice",
+  "id": "Customer",
   "fields": [
     {
       "id": "ID",
@@ -8,18 +8,22 @@
       "namePatterns": [
         {
           "type": "exact",
-          "value": "InvoiceId"
+          "value": "CustomerId"
+        },
+        {
+          "type": "exact",
+          "value": "customer_id"
         }
       ]
     },
     {
-      "id": "Total",
-      "type": "number"
+      "id": "Email",
+      "type": "string"
     }
   ],
   "tables": [
     {
-      "name": "Invoice"
+      "name": "Customer"
     }
   ]
 }

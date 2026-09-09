@@ -1,0 +1,38 @@
+{
+  "id": "invoice-lines",
+  "title": "Invoice lines",
+  "type": "SQL",
+  "parameters": [
+    {
+      "id": "InvoiceId",
+      "type": "integer",
+      "isRequired": true,
+      "meta": {
+        "entity": "Invoice",
+        "field": "ID"
+      }
+    }
+  ],
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "TrackName",
+          "type": "string"
+        },
+        {
+          "name": "UnitPrice",
+          "type": "number"
+        },
+        {
+          "name": "Quantity",
+          "type": "integer"
+        },
+        {
+          "name": "LineTotal",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

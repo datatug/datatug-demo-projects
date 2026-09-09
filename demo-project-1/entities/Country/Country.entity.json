@@ -2,5 +2,22 @@
   "id": "Country",
   "extends": {
     "def": "https://raw.githubusercontent.com/datatug/datatug-meta-iso/main/geo/country/country.json"
-  }
+  },
+  "fields": [
+    {
+      "id": "Name",
+      "type": "string",
+      "isKeyField": true,
+      "namePatterns": [
+        {
+          "type": "exact",
+          "value": "Country"
+        }
+      ]
+    },
+    {
+      "id": "Currency",
+      "type": "string"
+    }
+  ]
 }
