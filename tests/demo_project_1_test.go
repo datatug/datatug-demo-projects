@@ -94,8 +94,13 @@ func TestDemoProject1_Validate(t *testing.T) {
 // individually and asserts its dbServers.sqlite3 ServerRef is valid (S42's
 // fix for #307: environments/*/*.env.json declared "host":"localhost" for a
 // sqlite3 server, which ServerRef.Validate() correctly rejects - sqlite3 is
-// file-based and must have an empty host), then resolves the "local"
-// environment's "chinook-local" database catalog by id.
+// file-based and must have an empty host), then resolves the local and prod
+// environments' chinook database catalogs and asserts their real content
+// (S45: environments/{local,prod}/catalogs/*/*.db.json used to hold
+// {"server":{"host","driver"}}, not datatug.DbCatalogBase's actual
+// {"driver","path","dbModel"} shape, so Driver/Path/DbModel silently decoded
+// to "" despite the catalog ID itself resolving - the query executor could
+// never actually find the SQLite file).
 func TestDemoProject1_Environments(t *testing.T) {
 	store := newStore(t)
 	ctx := context.Background()
@@ -118,8 +123,41 @@ func TestDemoProject1_Environments(t *testing.T) {
 
 	catalogs, err := store.LoadEnvDbCatalogs(ctx, "local")
 	require.NoError(t, err)
-	assert.Contains(t, catalogs.IDs(), "chinook-local",
+	require.Contains(t, catalogs.IDs(), "chinook-local",
 		"the local environment must resolve its chinook-local database catalog")
+
+	// S45: environments/local/catalogs/chinook-local/chinook-local.db.json
+	// used to hold {"server":{"host":"localhost","driver":"sqlite3"}} - not
+	// datatug.DbCatalogBase's real shape ({"driver","path","dbModel"}), so
+	// every field below silently decoded to its zero value despite the
+	// catalog ID itself resolving fine (SetID comes from the directory name,
+	// not the JSON content). Assert the fields a query executor actually
+	// needs to open the SQLite file are populated.
+	var chinookLocal *datatug.DbCatalog
+	for _, c := range catalogs {
+		if c.ID == "chinook-local" {
+			chinookLocal = c
+			break
+		}
+	}
+	require.NotNil(t, chinookLocal)
+	assert.Equal(t, "sqlite3", chinookLocal.Driver)
+	assert.Equal(t, "~/datatug/dbs/chinook-local.sqlite", chinookLocal.Path)
+	assert.Equal(t, "chinook", chinookLocal.DbModel)
+
+	prodCatalogs, err := store.LoadEnvDbCatalogs(ctx, "prod")
+	require.NoError(t, err)
+	var chinookProd *datatug.DbCatalog
+	for _, c := range prodCatalogs {
+		if c.ID == "chinook-prod" {
+			chinookProd = c
+			break
+		}
+	}
+	require.NotNil(t, chinookProd, "the prod environment must resolve its chinook-prod database catalog")
+	assert.Equal(t, "sqlite3", chinookProd.Driver)
+	assert.Equal(t, "~/datatug/dbs/chinook-prod.sqlite", chinookProd.Path)
+	assert.Equal(t, "chinook", chinookProd.DbModel)
 }
 
 // TestDemoProject1_DeclaredMappings asserts the five mappings plan task 4
