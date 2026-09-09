@@ -160,6 +160,55 @@ func TestDemoProject1_Environments(t *testing.T) {
 	assert.Equal(t, "chinook", chinookProd.DbModel)
 }
 
+// TestDemoProject1_QueriesLoad proves LoadProject itself (datatug-core
+// v0.23.0/#309) now populates Project.Queries directly - no manual
+// loadQueries patch-up needed, unlike TestDemoProject1_Validate above (still
+// kept as-is; not in scope for this bump) - with all 5 real demo queries
+// (DTQL customer-invoices, SQL customer-purchases-by-genre/invoice-lines,
+// HTTP country-facts/currency-rate), each with its non-empty Text body, and
+// that Project.Validate() passes on the project exactly as LoadProject
+// returned it, with no query-loading workaround at all. None of the 5 real
+// queries currently declare Targets (confirmed by direct inspection of
+// demo-project-1/queries/**/*.query.json) - the empty-credential path is
+// exercised separately, by construction, in datatug-core's own fixture test.
+func TestDemoProject1_QueriesLoad(t *testing.T) {
+	store := newStore(t)
+	project, err := store.LoadProject(context.Background())
+	require.NoError(t, err, "failed to load %s", projectDir)
+
+	require.NotNil(t, project.Queries)
+	var findQuery func(folder *datatug.QueriesFolder, id string) *datatug.QueryDef
+	findQuery = func(folder *datatug.QueriesFolder, id string) *datatug.QueryDef {
+		for _, item := range folder.Items {
+			if item.ID == id {
+				return item
+			}
+		}
+		for _, sub := range folder.Folders {
+			if q := findQuery(sub, id); q != nil {
+				return q
+			}
+		}
+		return nil
+	}
+
+	wantTypes := map[string]datatug.QueryType{
+		"customer-invoices":           datatug.QueryTypeDTQL,
+		"customer-purchases-by-genre": datatug.QueryTypeSQL,
+		"invoice-lines":               datatug.QueryTypeSQL,
+		"country-facts":               datatug.QueryTypeHTTP,
+		"currency-rate":               datatug.QueryTypeHTTP,
+	}
+	for id, wantType := range wantTypes {
+		q := findQuery(project.Queries, id)
+		require.NotNil(t, q, "query %s not found in Project.Queries", id)
+		assert.Equal(t, wantType, q.Type, "query %s type", id)
+		assert.NotEmpty(t, q.Text, "query %s text", id)
+	}
+
+	assert.NoError(t, project.Validate())
+}
+
 // TestDemoProject1_DeclaredMappings asserts the five mappings plan task 4
 // lists are present, exactly as declared (see s3b-demo-mappings.md item 1).
 func TestDemoProject1_DeclaredMappings(t *testing.T) {
