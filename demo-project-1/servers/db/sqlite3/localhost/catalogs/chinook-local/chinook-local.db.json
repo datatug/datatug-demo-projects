@@ -1,4 +1,0 @@
-{
-	"driver": "sqlite3",
-	"path": "~/datatug/dbs/chinook-local.sqlite"
-}

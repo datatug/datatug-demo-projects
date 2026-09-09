@@ -1,9 +1,0 @@
-[
-  {
-    "driver": "sqlite3",
-    "host": "localhost",
-    "catalogs": [
-      "chinook-local"
-    ]
-  }
-]
