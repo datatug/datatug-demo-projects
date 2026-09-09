@@ -3,7 +3,7 @@ module github.com/datatug/datatug-demo-projects/tests
 go 1.26.0
 
 require (
-	github.com/datatug/datatug-core v0.21.0
+	github.com/datatug/datatug-core v0.22.0
 	github.com/stretchr/testify v1.12.1
 )
 

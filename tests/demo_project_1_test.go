@@ -55,11 +55,14 @@ func loadQueries(t *testing.T, store datatug.ProjectStore, ids ...string) datatu
 // TestDemoProject1_Validate loads demo-project-1 through the real
 // filestore.LoadProject (datatug-core v0.20.0/#305 fixed entities loading
 // from demo-project-1's per-entity directories; v0.21.0/#306 fixed the same
-// bug class for boards and DB models, and Project.Validate() has covered
-// declared mappings since v0.17.0/#302) and asserts: every entity loads, the
-// demo's board1 board and chinook DB model load with their real content,
-// and - once its three library queries are attached, the one thing
-// LoadProject still doesn't populate - Project.Validate() passes.
+// bug class for boards and DB models, v0.22.0 makes LoadProject load each
+// environment's own "<id>.env.json" and fixes #307 so a file-based sqlite3
+// ServerRef with an empty host validates, and Project.Validate() has
+// covered declared mappings since v0.17.0/#302) and asserts: every entity
+// loads, the demo's board1 board and chinook DB model load with their real
+// content, every environment loads with a validating sqlite3 ServerRef, and
+// - once its three library queries are attached, the one thing LoadProject
+// still doesn't populate - Project.Validate() passes.
 func TestDemoProject1_Validate(t *testing.T) {
 	store := newStore(t)
 	project, err := store.LoadProject(context.Background())
@@ -77,11 +80,46 @@ func TestDemoProject1_Validate(t *testing.T) {
 		assert.Equal(t, "chinook", project.DbModels[0].ID)
 	}
 
+	wantEnvIDs := []string{"dev", "local", "prod", "QA", "UAT"}
+	assert.ElementsMatch(t, wantEnvIDs, project.Environments.IDs())
+
 	project.Queries = &datatug.QueriesFolder{
 		Items: loadQueries(t, store, "customers/customer-invoices", "customers/customer-purchases-by-genre", "invoices/invoice-lines"),
 	}
 
 	assert.NoError(t, project.Validate())
+}
+
+// TestDemoProject1_Environments loads every demo-project-1 environment
+// individually and asserts its dbServers.sqlite3 ServerRef is valid (S42's
+// fix for #307: environments/*/*.env.json declared "host":"localhost" for a
+// sqlite3 server, which ServerRef.Validate() correctly rejects - sqlite3 is
+// file-based and must have an empty host), then resolves the "local"
+// environment's "chinook-local" database catalog by id.
+func TestDemoProject1_Environments(t *testing.T) {
+	store := newStore(t)
+	ctx := context.Background()
+
+	envs, err := store.LoadEnvironments(ctx)
+	require.NoError(t, err)
+
+	wantEnvIDs := []string{"dev", "local", "prod", "QA", "UAT"}
+	assert.ElementsMatch(t, wantEnvIDs, envs.IDs())
+
+	for _, env := range envs {
+		t.Run(env.ID, func(t *testing.T) {
+			require.NotEmpty(t, env.DbServers, "environment %s has no dbServers", env.ID)
+			for i, server := range env.DbServers {
+				assert.NoError(t, server.ServerRef.Validate(), "dbServers[%d].ServerRef in environment %s", i, env.ID)
+			}
+			assert.NoError(t, env.Validate(), "environment %s", env.ID)
+		})
+	}
+
+	catalogs, err := store.LoadEnvDbCatalogs(ctx, "local")
+	require.NoError(t, err)
+	assert.Contains(t, catalogs.IDs(), "chinook-local",
+		"the local environment must resolve its chinook-local database catalog")
 }
 
 // TestDemoProject1_DeclaredMappings asserts the five mappings plan task 4
