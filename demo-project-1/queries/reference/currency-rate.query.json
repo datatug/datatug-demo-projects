@@ -1,0 +1,42 @@
+{
+  "id": "currency-rate",
+  "title": "Exchange rate for the customer's currency",
+  "type": "HTTP",
+  "parameters": [
+    {
+      "id": "to",
+      "type": "string",
+      "isRequired": true,
+      "meta": {
+        "entity": "Country",
+        "field": "Currency"
+      }
+    }
+  ],
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "amount",
+          "type": "number"
+        },
+        {
+          "name": "base",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "name": "rates",
+          "type": "JSON",
+          "meta": {
+            "entity": "Country",
+            "field": "Currency"
+          }
+        }
+      ]
+    }
+  ]
+}

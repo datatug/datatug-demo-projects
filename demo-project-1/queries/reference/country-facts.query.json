@@ -1,0 +1,38 @@
+{
+  "id": "country-facts",
+  "title": "Country facts (currency by country name)",
+  "type": "HTTP",
+  "parameters": [
+    {
+      "id": "name",
+      "type": "string",
+      "isRequired": true,
+      "meta": {
+        "entity": "Country",
+        "field": "Name"
+      }
+    }
+  ],
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "name",
+          "type": "string",
+          "meta": {
+            "entity": "Country",
+            "field": "Name"
+          }
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "meta": {
+            "entity": "Country",
+            "field": "Currency"
+          }
+        }
+      ]
+    }
+  ]
+}

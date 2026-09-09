@@ -1,0 +1,34 @@
+{
+  "id": "customer-purchases-by-genre",
+  "title": "Customer purchases by genre",
+  "type": "SQL",
+  "parameters": [
+    {
+      "id": "CustomerId",
+      "type": "integer",
+      "isRequired": true,
+      "meta": {
+        "entity": "Customer",
+        "field": "ID"
+      }
+    }
+  ],
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "GenreName",
+          "type": "string"
+        },
+        {
+          "name": "TracksPurchased",
+          "type": "integer"
+        },
+        {
+          "name": "TotalSpent",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

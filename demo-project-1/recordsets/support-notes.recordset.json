@@ -1,0 +1,32 @@
+{
+  "id": "support-notes",
+  "title": "Support notes",
+  "type": "recordset",
+  "tags": ["support", "customer", "ingitdb"],
+  "columns": [
+    {
+      "name": "CustomerId",
+      "type": "integer",
+      "required": true,
+      "meta": {
+        "entity": "Customer",
+        "field": "ID"
+      }
+    },
+    {
+      "name": "Author",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "CreatedAt",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "Note",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

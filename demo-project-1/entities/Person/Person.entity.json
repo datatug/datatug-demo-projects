@@ -2,10 +2,12 @@
   "id": "Person",
   "fields": [
     {
-      "id": "id"
+      "id": "id",
+      "type": "string"
     },
     {
-      "id": "name"
+      "id": "name",
+      "type": "string"
     }
   ]
 }

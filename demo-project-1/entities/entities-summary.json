@@ -2,5 +2,9 @@
   {
     "id": "Country",
     "note": "Defines fields specific to a country, e.g. ISO code, name, population, etc."
+  },
+  {
+    "id": "Customer",
+    "note": "A Chinook customer, keyed by CustomerId; Email is the field hidden from the support policy principal."
   }
 ]

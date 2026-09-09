@@ -1,0 +1,10 @@
+{
+  "error": false,
+  "msg": "Canada and currency retrieved",
+  "data": {
+    "name": "Canada",
+    "currency": "CAD",
+    "iso2": "CA",
+    "iso3": "CAN"
+  }
+}
