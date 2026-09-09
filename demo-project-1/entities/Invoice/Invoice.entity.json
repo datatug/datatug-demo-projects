@@ -10,6 +10,13 @@
           "type": "exact",
           "value": "InvoiceId"
         }
+      ],
+      "mappings": [
+        {
+          "source": "chinook",
+          "collection": "Invoice",
+          "column": "InvoiceId"
+        }
       ]
     },
     {
