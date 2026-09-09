@@ -1,0 +1,18 @@
+from:
+  name: Invoice
+  alias: i
+columns:
+  - field: InvoiceId
+  - field: InvoiceDate
+  - field: BillingCity
+  - field: BillingCountry
+  - field: Total
+where:
+  op: ==
+  left:
+    field: CustomerId
+  right:
+    param: CustomerId
+orderBy:
+  - field: InvoiceDate
+    desc: true

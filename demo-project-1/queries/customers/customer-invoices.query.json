@@ -1,7 +1,7 @@
 {
   "id": "customer-invoices",
   "title": "Customer invoices",
-  "type": "SQL",
+  "type": "DTQL",
   "parameters": [
     {
       "id": "CustomerId",

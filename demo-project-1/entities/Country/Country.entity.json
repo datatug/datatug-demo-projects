@@ -13,6 +13,13 @@
           "type": "exact",
           "value": "Country"
         }
+      ],
+      "mappings": [
+        {
+          "source": "chinook",
+          "collection": "Customer",
+          "column": "Country"
+        }
       ]
     },
     {

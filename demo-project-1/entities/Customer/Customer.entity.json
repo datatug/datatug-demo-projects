@@ -14,11 +14,30 @@
           "type": "exact",
           "value": "customer_id"
         }
+      ],
+      "mappings": [
+        {
+          "source": "chinook",
+          "collection": "Customer",
+          "column": "CustomerId"
+        },
+        {
+          "source": "support-notes",
+          "collection": "support-notes",
+          "column": "CustomerId"
+        }
       ]
     },
     {
       "id": "Email",
-      "type": "string"
+      "type": "string",
+      "mappings": [
+        {
+          "source": "chinook",
+          "collection": "Customer",
+          "column": "Email"
+        }
+      ]
     }
   ],
   "tables": [
