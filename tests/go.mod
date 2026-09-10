@@ -3,9 +3,9 @@ module github.com/datatug/datatug-demo-projects/tests
 go 1.27.0
 
 require (
-	github.com/dal-go/dalgo v0.79.5
+	github.com/dal-go/dalgo v0.80.0
 	github.com/datatug/datatug-cli v0.18.0
-	github.com/datatug/datatug-core v0.23.0
+	github.com/datatug/datatug-core v0.27.3
 	github.com/stretchr/testify v1.12.1
 	modernc.org/sqlite v1.57.0
 )
