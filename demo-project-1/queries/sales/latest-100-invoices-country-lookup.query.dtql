@@ -1,0 +1,5 @@
+from:
+  database: orders
+  name: Invoice
+  alias: i
+  scan: {orderBy: [{field: id, desc: true}], limit: 100}

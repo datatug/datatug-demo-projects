@@ -1,0 +1,27 @@
+{
+  "id": "latest-100-invoices-country-lookup",
+  "title": "Latest invoices with country HTTP lookup",
+  "type": "DTQL",
+  "purpose": "Read each invoice and fetch its country population from the OVDB record endpoint.",
+  "federation": {
+    "ovdbBaseUrl": "http://127.0.0.1:50501",
+    "tables": [
+      {"database": "orders", "name": "Invoice", "fields": ["id", "country_id", "amount"]}
+    ],
+    "lookups": [
+      {
+        "database": "countries",
+        "collection": "Country",
+        "fromColumn": "country_id",
+        "fields": [{"source": "population", "target": "populationFromHttp"}],
+        "concurrency": 8
+      }
+    ]
+  },
+  "recordsets": [{"columns": [
+    {"name": "id", "type": "number"},
+    {"name": "country_id", "type": "number"},
+    {"name": "amount", "type": "number"},
+    {"name": "populationFromHttp", "type": "number"}
+  ]}]
+}

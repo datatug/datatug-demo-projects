@@ -1,0 +1,69 @@
+{
+  "id": "latest-100-sales-http-lookup",
+  "title": "Sales per capita with HTTP country lookup",
+  "type": "DTQL",
+  "purpose": "Show the same cross-database sales totals and enrich each country with population from the OVDB record endpoint.",
+  "federation": {
+    "ovdbBaseUrl": "http://127.0.0.1:50501",
+    "tables": [
+      {
+        "name": "Invoice",
+        "fields": [
+          "id",
+          "country_id",
+          "amount"
+        ],
+        "database": "orders"
+      },
+      {
+        "name": "Country",
+        "fields": [
+          "id",
+          "name",
+          "population"
+        ],
+        "database": "countries"
+      }
+    ],
+    "lookups": [
+      {
+        "database": "countries",
+        "collection": "Country",
+        "fromColumn": "countryId",
+        "fields": [
+          {
+            "source": "population",
+            "target": "populationFromHttp"
+          }
+        ],
+        "concurrency": 4
+      }
+    ]
+  },
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "country",
+          "type": "string"
+        },
+        {
+          "name": "countryId",
+          "type": "number"
+        },
+        {
+          "name": "totalSales",
+          "type": "number"
+        },
+        {
+          "name": "salesPerCapita",
+          "type": "number"
+        },
+        {
+          "name": "populationFromHttp",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}
