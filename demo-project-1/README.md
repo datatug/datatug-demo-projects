@@ -74,6 +74,11 @@ totals are returned. A live source changing during a paged read does not
 provide a snapshot; use an immutable source or a provider snapshot for exact
 reports.
 
+The DALgo Go reader streams flat output rows, while the current DataTug CLI
+result renderer collects them to calculate its columns and statistics. Large
+CLI exports should use a bounded query until a streaming output format is
+available.
+
 The next general-purpose scale step is temporary indexed join storage (SQLite
 in Go; IndexedDB indexes in the browser) and spillable groups. That would let
 both joined sides exceed the current memory limits.
