@@ -65,7 +65,9 @@ They handle aggregate totals and non-aggregating result rows; the latter are
 emitted in bounded pages by DALgo and read 100 rows at a time by DataTug.
 Tests cover 120,000 input rows and 120,000 output rows. A Chromium run against
 a temporary 120,000-invoice OVDB fixture confirmed first, next, and last page
-fetches, progress, and cleanup of both temporary IndexedDB tables. The
+fetches, progress, and cleanup of both temporary IndexedDB tables. A joined
+250-row HTTP lookup run confirmed bounded requests and three output pages;
+interrupting a larger run also removed its temporary tables. The
 dimension remains capped at 10,000 rows and the browser retained join state
 at 16 MiB. Distinct
 aggregate groups are bounded too. Other join shapes still use DALgo's bounded
