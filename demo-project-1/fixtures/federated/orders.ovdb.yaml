@@ -1,0 +1,13 @@
+database:
+  id: orders
+  schema_mode: strict
+storage:
+  engine: sqlite
+  path: ./orders.sqlite
+schemas:
+  collections:
+    Invoice:
+      fields:
+        id: {type: integer}
+        country_id: {type: integer}
+        amount: {type: number}

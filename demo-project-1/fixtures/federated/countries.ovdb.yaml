@@ -1,0 +1,13 @@
+database:
+  id: countries
+  schema_mode: strict
+storage:
+  engine: sqlite
+  path: ./countries.sqlite
+schemas:
+  collections:
+    Country:
+      fields:
+        id: {type: integer}
+        name: {type: string}
+        population: {type: integer}

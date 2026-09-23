@@ -1,0 +1,47 @@
+{
+  "id": "latest-100-sales-per-capita",
+  "title": "Sales per capita from latest 100 invoices",
+  "type": "DTQL",
+  "purpose": "Join the latest 100 invoices to country population across two databases, then show total sales and sales per capita.",
+  "federation": {
+    "ovdbBaseUrl": "http://127.0.0.1:50501",
+    "tables": [
+      {
+        "name": "Invoice",
+        "fields": [
+          "id",
+          "country_id",
+          "amount"
+        ],
+        "database": "orders"
+      },
+      {
+        "name": "Country",
+        "fields": [
+          "id",
+          "name",
+          "population"
+        ],
+        "database": "countries"
+      }
+    ]
+  },
+  "recordsets": [
+    {
+      "columns": [
+        {
+          "name": "country",
+          "type": "string"
+        },
+        {
+          "name": "totalSales",
+          "type": "number"
+        },
+        {
+          "name": "salesPerCapita",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}
