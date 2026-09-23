@@ -47,7 +47,9 @@ ovdb serve --addr 127.0.0.1:50501 \
 Use the actual DataTug web origin for `--cors`. Stop the temporary server with
 Ctrl-C. The browser sends paged DTQL directly to OVDB, stages ID and JSON data
 in a temporary IndexedDB database, and joins and calculates inside a Web
-Worker. It deletes that temporary database when the run ends. The UI reports
+Worker. It stores large output pages in a second temporary IndexedDB table
+and sends only the visible result page to the UI. Query input is deleted when
+the run ends; output is deleted when the result closes. The UI reports
 loaded and processed rows and completed, in-flight, and pending HTTP lookups.
 
 ## Large results
@@ -60,18 +62,18 @@ request and advances by ascending stable `id`; it does not rely on OVDB's
 
 The streaming paths require one flat equality join and a bounded dimension.
 They handle aggregate totals and non-aggregating result rows; the latter are
-emitted in bounded pages by DALgo and shown 100 rows at a time in DataTug.
-Tests cover 120,000 input rows and 120,000 output rows. The dimension remains
-capped at 10,000 rows and the browser retained join state at 16 MiB. Distinct
+emitted in bounded pages by DALgo and read 100 rows at a time by DataTug.
+Tests cover 120,000 input rows and 120,000 output rows. A Chromium run against
+a temporary 120,000-invoice OVDB fixture confirmed first, next, and last page
+fetches, progress, and cleanup of both temporary IndexedDB tables. The
+dimension remains capped at 10,000 rows and the browser retained join state
+at 16 MiB. Distinct
 aggregate groups are bounded too. Other join shapes still use DALgo's bounded
-generic evaluator. DataTug's current run response collects output pages in
-memory, so browser memory still grows with total result rows even though DOM
-rendering and source fetches are paged. Query failures are explicit: no partial
+generic evaluator. Query failures are explicit: no partial
 totals are returned. A live source changing during a paged read does not
 provide a snapshot; use an immutable source or a provider snapshot for exact
 reports.
 
 The next general-purpose scale step is temporary indexed join storage (SQLite
-in Go; IndexedDB indexes in the browser), spillable groups, and an output-page
-API from the worker through the DataTug result view. That would let both large
-sides exceed memory limits and keep browser memory bounded by the visible page.
+in Go; IndexedDB indexes in the browser) and spillable groups. That would let
+both joined sides exceed the current memory limits.
