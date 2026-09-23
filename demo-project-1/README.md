@@ -58,14 +58,20 @@ groups, rather than every fact row. The browser reads at most 500 rows per OVDB
 request and advances by ascending stable `id`; it does not rely on OVDB's
 10,000-row offset ceiling. The Go path consumes the database's records reader.
 
-This plan currently requires one flat equality join, a bounded dimension, and
-aggregation. The dimension is capped at 10,000 rows and the browser retained
-state at 16 MiB. A non-aggregating many-to-many result still uses DALgo's
-bounded generic evaluator. Query failures are explicit: no partial totals are
-returned. A live source changing during a paged read does not provide a
-snapshot; use an immutable source or a provider snapshot for exact reports.
+The streaming paths require one flat equality join and a bounded dimension.
+They handle aggregate totals and non-aggregating result rows; the latter are
+emitted in bounded pages by DALgo and shown 100 rows at a time in DataTug.
+Tests cover 120,000 input rows and 120,000 output rows. The dimension remains
+capped at 10,000 rows and the browser retained join state at 16 MiB. Distinct
+aggregate groups are bounded too. Other join shapes still use DALgo's bounded
+generic evaluator. DataTug's current run response collects output pages in
+memory, so browser memory still grows with total result rows even though DOM
+rendering and source fetches are paged. Query failures are explicit: no partial
+totals are returned. A live source changing during a paged read does not
+provide a snapshot; use an immutable source or a provider snapshot for exact
+reports.
 
 The next general-purpose scale step is temporary indexed join storage (SQLite
-in Go; IndexedDB indexes in the browser), spillable groups, and paged output.
-That would let both large sides exceed memory limits and let users browse
-hundreds of thousands of result rows without rendering them all at once.
+in Go; IndexedDB indexes in the browser), spillable groups, and an output-page
+API from the worker through the DataTug result view. That would let both large
+sides exceed memory limits and keep browser memory bounded by the visible page.
