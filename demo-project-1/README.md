@@ -21,8 +21,9 @@ datatug-demo-project
 `orders` SQLite database, joins `Country` in the separate `countries` database,
 then calculates total sales and sales per capita for each country. The oldest
 two invoices deliberately have large amounts, so a query that limits before
-sorting returns the wrong answer. The expected rows are Alpha: 500 and 5 per
-capita; Beta: 1,000 and 5 per capita.
+sorting returns the wrong answer. Exact amount arithmetic makes `totalSales`
+and `salesPerCapita` decimal strings. The expected rows are Alpha: `"500"` and
+`"5"` per capita; Beta: `"1000"` and `"5"` per capita.
 
 Run the saved query from this project with:
 
@@ -45,7 +46,9 @@ ovdb serve --addr 127.0.0.1:50501 \
 ```
 
 Use the actual DataTug web origin for `--cors`. Stop the temporary server with
-Ctrl-C. The browser sends paged DTQL directly to OVDB, stages ID and JSON data
+Ctrl-C. The browser sends paged DTQL directly to OVDB. OVDB captures each
+source result before serving its first page, and the browser releases the
+capture after the last page or cancellation. It stages ID and JSON data
 in a temporary IndexedDB database, and joins and calculates inside a Web
 Worker. It stores large output pages in a second temporary IndexedDB table
 and sends only the visible result page to the UI. Query input is deleted when
@@ -57,8 +60,8 @@ loaded and processed rows and completed, in-flight, and pending HTTP lookups.
 The scalable aggregate plan streams a large invoice or other fact relation in
 both DALgo runtimes. It retains the joined dimension and distinct aggregate
 groups, rather than every fact row. The browser reads at most 500 rows per OVDB
-request and advances by ascending stable `id`; it does not rely on OVDB's
-10,000-row offset ceiling. The Go path consumes the database's records reader.
+request from an immutable result snapshot. The Go path consumes the database's
+records reader.
 
 The streaming paths require one flat equality join and a bounded dimension.
 They handle aggregate totals and non-aggregating result rows; the latter are
@@ -71,15 +74,15 @@ interrupting a larger run also removed its temporary tables. The
 dimension remains capped at 10,000 rows and the browser retained join state
 at 16 MiB. Distinct
 aggregate groups are bounded too. Other join shapes still use DALgo's bounded
-generic evaluator. Query failures are explicit: no partial
-totals are returned. A live source changing during a paged read does not
-provide a snapshot; use an immutable source or a provider snapshot for exact
-reports.
+generic evaluator. Query failures are explicit: no partial totals are returned.
+Each OVDB source snapshot is stable across pages; separate databases are
+captured independently, so there is no single atomic instant across both.
 
-The DALgo Go reader streams flat output rows, while the current DataTug CLI
-result renderer collects them to calculate its columns and statistics. Large
-CLI exports should use a bounded query until a streaming output format is
-available.
+The CLI supports bounded-memory JSONL and CSV export for a flat equality join
+with an explicitly bounded, ordered dimension scan. HTTP lookups use bounded
+request batches. Aggregate output, including this per-country sales query,
+continues through the normal result path because its group count can grow with
+the input; streaming export rejects unsupported query shapes explicitly.
 
 The next general-purpose scale step is temporary indexed join storage (SQLite
 in Go; IndexedDB indexes in the browser) and spillable groups. That would let

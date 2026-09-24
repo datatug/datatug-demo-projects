@@ -6,6 +6,7 @@ from:
   joins:
     - from: {database: countries, name: Country, alias: c}
       on: [{left: {field: country_id, source: o}, op: '==', right: {field: id, source: c}}]
+money: {minorUnitScale: 2, divisionScale: 4, rounding: halfEven}
 groupBy: [{field: id, source: c}, {field: name, source: c}, {field: population, source: c}]
 columns:
   - {field: name, source: c, as: country}
