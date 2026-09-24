@@ -2,6 +2,7 @@
   "id": "customer-purchases-by-genre",
   "title": "Customer purchases by genre",
   "type": "SQL",
+  "targets": [{"catalog": "chinook-local"}, {"catalog": "chinook-prod"}],
   "parameters": [
     {
       "id": "CustomerId",

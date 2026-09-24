@@ -2,6 +2,7 @@
   "id": "invoice-lines",
   "title": "Invoice lines",
   "type": "SQL",
+  "targets": [{"catalog": "chinook-local"}, {"catalog": "chinook-prod"}],
   "parameters": [
     {
       "id": "InvoiceId",
